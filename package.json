@@ -3,11 +3,15 @@
   "version": "0.0.1",
   "description": "Next.js Server Actions with fully type-safety using zod",
   "main": "dist/index.js",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "scripts": {
-    "lint": "eslint --ext \".ts\" --ignore-path .gitignore .",
-    "lint:check": "pnpm run lint && prettier --check .",
-    "lint:fix": "prettier --write --list-different . && pnpm run lint --fix"
+    "build": "tsup src/index.ts --format cjs,esm --dts --minify --clean",
+    "ts:check": "tsc",
+    "lint:eslint": "eslint --ext \".ts\" --ignore-path .gitignore .",
+    "lint:check": "pnpm run lint:eslint && prettier --check .",
+    "lint:fix": "prettier --write --list-different . && pnpm run lint:eslint --fix",
+    "lint": "pnpm run ts:check && pnpm run lint:check"
   },
   "repository": {
     "type": "git",
@@ -39,14 +43,18 @@
     "zod": "^3.0.0"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.26.2",
     "@types/react": "^18.2.14",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.44.0",
     "eslint-config-next": "^13.4.9",
     "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-prettier": "^5.0.0",
     "prettier": "^3.0.0",
-    "typescript": "^5.1.6"
+    "tsup": "^7.1.0",
+    "typescript": "^5.1.6",
+    "zod": "^3.21.4"
   }
 }
