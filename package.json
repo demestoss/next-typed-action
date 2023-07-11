@@ -1,0 +1,52 @@
+{
+  "name": "next-typed-action",
+  "version": "0.0.1",
+  "description": "Next.js Server Actions with fully type-safety using zod",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "lint": "eslint --ext \".ts\" --ignore-path .gitignore .",
+    "lint:check": "pnpm run lint && prettier --check .",
+    "lint:fix": "prettier --write --list-different . && pnpm run lint --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/demestoss/next-typed-action.git"
+  },
+  "keywords": [
+    "next",
+    "nextjs",
+    "next.js",
+    "server actions",
+    "typed actions",
+    "safe actions",
+    "zod",
+    "next actions",
+    "next server",
+    "next server actions",
+    "nextjs actions",
+    "nextjs server actions"
+  ],
+  "author": "Dmitriy Popov",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/demestoss/next-typed-action/issues"
+  },
+  "homepage": "https://github.com/demestoss/next-typed-action#readme",
+  "peerDependencies": {
+    "next": "^13.4.0",
+    "react": "^18.2.0",
+    "zod": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.14",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.44.0",
+    "eslint-config-next": "^13.4.9",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.1.6"
+  }
+}
