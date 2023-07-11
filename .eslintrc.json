@@ -1,5 +1,5 @@
 {
-  "extends": "next/core-web-vitals",
+  "extends": ["next/core-web-vitals", "plugin:import/recommended"],
   "parserOptions": {
     "ecmaVersion": "latest",
     "parser": "@typescript-eslint/parser",
@@ -7,17 +7,8 @@
     "project": "./tsconfig.json"
   },
   "rules": {
-    "@typescript-eslint/strict-boolean-expressions": [
-      "error",
-      {
-        "allowNullableBoolean": true,
-        "allowNullableString": true,
-        "allowNullableNumber": true
-      }
-    ],
     "@typescript-eslint/consistent-type-imports": "error",
-    "@typescript-eslint/consistent-type-exports": "error",
-    "sort-imports": "error"
+    "@typescript-eslint/consistent-type-exports": "error"
   },
   "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint"]
