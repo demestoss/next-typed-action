@@ -1,5 +1,9 @@
 import { z } from 'zod'
-import type { ActionResponse, StatusToResponseState , FieldsValidationError } from './types'
+import type {
+  ActionResponse,
+  StatusToResponseState,
+  FieldsValidationError,
+} from './types'
 
 function toSuccessResponse<TData>(data: TData) {
   return {

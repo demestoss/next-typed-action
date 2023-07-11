@@ -9,8 +9,8 @@
     "build": "tsup src/index.ts --format cjs,esm --dts --minify --clean",
     "ts:check": "tsc",
     "lint:eslint": "eslint --ext \".ts\" --ignore-path .gitignore .",
-    "lint:check": "pnpm run lint && prettier --check .",
-    "lint:fix": "prettier --write --list-different . && pnpm run lint --fix",
+    "lint:check": "pnpm run lint:eslint && prettier --check .",
+    "lint:fix": "prettier --write --list-different . && pnpm run lint:eslint --fix",
     "lint": "pnpm run ts:check && pnpm run lint:check"
   },
   "repository": {
