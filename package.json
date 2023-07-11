@@ -11,7 +11,8 @@
     "lint:eslint": "eslint --ext \".ts\" --ignore-path .gitignore .",
     "lint:check": "pnpm run lint:eslint && prettier --check .",
     "lint:fix": "prettier --write --list-different . && pnpm run lint:eslint --fix",
-    "lint": "pnpm run ts:check && pnpm run lint:check"
+    "lint": "pnpm run ts:check && pnpm run lint:check",
+    "publish": "pnpm run build && pnpm run changeset publish"
   },
   "repository": {
     "type": "git",
