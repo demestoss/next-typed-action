@@ -1,5 +1,11 @@
 # next-typed-action
 
+## 0.0.3
+
+### Patch Changes
+
+- 24e7235: Changeset npm publish fix
+
 ## 0.0.2
 
 ### Patch Changes
