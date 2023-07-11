@@ -18,6 +18,9 @@
     "type": "git",
     "url": "git+https://github.com/demestoss/next-typed-action.git"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "dist",
     "package.json",
