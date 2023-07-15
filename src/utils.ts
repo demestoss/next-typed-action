@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import type { z } from 'zod'
 import type {
   ActionResponse,
   StatusToResponseState,
@@ -30,46 +30,14 @@ function toErrorResponse(error: unknown) {
   return {
     status: 'error',
     data: undefined,
-    error: error instanceof Error ? error : error,
+    error:
+      error instanceof Error
+        ? error
+        : typeof error === 'string'
+        ? new Error(error)
+        : new Error('Unknown error'),
     validationError: undefined,
   } as const
 }
 
-function isSafeResponse(res: unknown) {
-  return (
-    typeof res === 'object' &&
-    res !== null &&
-    'status' in res &&
-    'data' in res &&
-    'error' in res &&
-    'validationError' in res
-  )
-}
-
-function toSuccessResponseOrAction<
-  TSchema extends z.ZodTypeAny,
-  TData,
-  TResponse extends TData | ActionResponse<TSchema, TData>,
->(data: TResponse): ActionResponse<TSchema, TData> {
-  if (isSafeResponse(data)) {
-    return data as ActionResponse<TSchema, TData>
-  }
-  return toSuccessResponse(data as TData)
-}
-
-function toUnknownErrorResponse<TSchema extends z.ZodTypeAny, TData>(
-  error: unknown
-): StatusToResponseState<'error' | 'validationError', TSchema, TData> {
-  if (error instanceof z.ZodError) {
-    return toValidationErrorResponse(error)
-  }
-  return toErrorResponse(error)
-}
-
-export {
-  toSuccessResponseOrAction,
-  toUnknownErrorResponse,
-  toSuccessResponse,
-  toErrorResponse,
-  toValidationErrorResponse,
-}
+export { toSuccessResponse, toErrorResponse, toValidationErrorResponse }

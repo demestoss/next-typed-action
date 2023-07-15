@@ -3,7 +3,7 @@ import type { ActionInput, FieldsValidationError } from './types'
 
 type HookCallbacks<TSchema extends z.ZodTypeAny, TData> = {
   onSuccess?: (data: TData, reset: () => void) => void
-  onError?: (error: Error | unknown, reset: () => void) => void
+  onError?: (error: Error, reset: () => void) => void
   onValidationError?: (
     error: FieldsValidationError<TSchema>,
     reset: () => void

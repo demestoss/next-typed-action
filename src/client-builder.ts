@@ -1,10 +1,9 @@
 import type { z } from 'zod'
 import type {
-  SafeActionWithValidation,
   ServerAction,
-  ActionWithValidation,
   ActionResponse,
   ActionInput,
+  ActionWithValidation,
 } from './types'
 import type { Simplify } from './client-builder.utils'
 import {
@@ -49,10 +48,10 @@ class TypedServerActionWithValidation<
     this.#schema = schema
   }
 
-  safeAction =
+  action =
     <TData>(
       serverAction: ServerAction<TSchema, TContext, TData>
-    ): SafeActionWithValidation<TSchema, TData> =>
+    ): ActionWithValidation<TSchema, TData> =>
     async (
       input: ActionInput<TSchema>
     ): Promise<ActionResponse<TSchema, TData>> => {
@@ -79,23 +78,6 @@ class TypedServerActionWithValidation<
         console.error(error)
         return toErrorResponse(error)
       }
-    }
-
-  action =
-    <TData>(
-      serverAction: ServerAction<TSchema, TContext, TData>
-    ): ActionWithValidation<TSchema, TData> =>
-    async (input: ActionInput<TSchema>): Promise<TData> => {
-      const ctx = await this.#context
-
-      const unwrappedInput =
-        input instanceof FormData ? Object.fromEntries(input.entries()) : input
-      const parsedInput = this.#schema.parse(unwrappedInput)
-
-      return serverAction({
-        input: parsedInput.data,
-        ctx,
-      })
     }
 }
 
