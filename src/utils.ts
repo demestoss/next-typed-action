@@ -1,9 +1,5 @@
 import type { z } from 'zod'
-import type {
-  ActionResponse,
-  StatusToResponseState,
-  FieldsValidationError,
-} from './types'
+import type { FieldsValidationError } from './types'
 
 function toSuccessResponse<TData>(data: TData) {
   return {
@@ -32,10 +28,10 @@ function toErrorResponse(error: unknown) {
     data: undefined,
     error:
       error instanceof Error
-        ? error
+        ? error?.message
         : typeof error === 'string'
-        ? new Error(error)
-        : new Error('Unknown error'),
+        ? error
+        : error?.toString() ?? 'Unknown error',
     validationError: undefined,
   } as const
 }

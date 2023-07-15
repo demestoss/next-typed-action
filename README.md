@@ -226,7 +226,7 @@ type LoginActionClient = inferAction<typeof actionClient> // { ctx: { userId: st
 const {
   status: 'error' | 'validationError' | 'success' | 'idle',
   data: TData | undefined,
-  error: Error | undefined,
+  error: string | undefined,
   validationError: Record<keyof z.input<TSchema>, string[]> | undefined,
   isLoading: boolean,
   isError: boolean,
