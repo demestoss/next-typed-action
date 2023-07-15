@@ -3,7 +3,7 @@ import type {
   ServerAction,
   ActionResponse,
   ActionInput,
-  ActionWithValidation,
+  ClientServerAction,
 } from './types'
 import type { Simplify } from './client-builder.utils'
 import {
@@ -51,9 +51,10 @@ class TypedServerActionWithValidation<
   action =
     <TData>(
       serverAction: ServerAction<TSchema, TContext, TData>
-    ): ActionWithValidation<TSchema, TData> =>
+    ): ClientServerAction<TSchema, TData> =>
     async (
-      input: ActionInput<TSchema>
+      input: ActionInput<TSchema>,
+      opts: { throwError?: boolean } = {}
     ): Promise<ActionResponse<TSchema, TData>> => {
       try {
         const ctx = await this.#context
@@ -76,6 +77,11 @@ class TypedServerActionWithValidation<
         return toSuccessResponse(data)
       } catch (error) {
         console.error(error)
+
+        if (opts.throwError) {
+          throw error
+        }
+
         return toErrorResponse(error)
       }
     }

@@ -49,8 +49,10 @@ function useActionSubmit<TSchema extends z.ZodTypeAny, TData>(
       schema: ActionInput<TSchema>,
       reset: () => void
     ): Promise<ActionResponse<TSchema, TData>> =>
-      serverActionRef.current(schema).then((r) => runHooks(r, reset)),
-    [runHooks]
+      serverActionRef
+        .current(schema, { throwError: opts.throwOnError })
+        .then((r) => runHooks(r, reset)),
+    [runHooks, opts.throwOnError]
   )
 }
 
@@ -70,14 +72,19 @@ function useFormAction<TSchema extends z.ZodTypeAny, TData>(
   }, [])
 
   const submit = useCallback(
-    (schema: ActionInput<TSchema>) => {
-      startTransition(() => {
+    (schema: ActionInput<TSchema>) =>
+      startTransition(() =>
+        // @ts-ignore
         submitAction(schema, reset)
           .then((res) => setResponse(res))
-          .catch((e: unknown) => setResponse(toErrorResponse(e)))
-      })
-    },
-    [reset, submitAction]
+          .catch((e: unknown) => {
+            if (opts.throwOnError) {
+              throw e
+            }
+            setResponse(toErrorResponse(e))
+          })
+      ),
+    [reset, submitAction, opts.throwOnError]
   )
 
   const status = response?.status
