@@ -12,7 +12,7 @@ type StatusToResponseState<
   ? {
       status: TStatus
       data: TStatus extends 'success' ? TData : undefined
-      error: TStatus extends 'error' ? Error | unknown : undefined
+      error: TStatus extends 'error' ? Error : undefined
       validationError: TStatus extends 'validationError'
         ? FieldsValidationError<TSchema>
         : undefined
@@ -30,22 +30,19 @@ type ActionResponse<
 
 type ActionInput<TSchema extends z.ZodTypeAny> = z.input<TSchema> | FormData
 
-type SafeActionWithValidation<TSchema extends z.ZodTypeAny, TData> = (
-  input: ActionInput<TSchema>
-) => Promise<ActionResponse<TSchema, TData>>
-
 type ActionWithValidation<TSchema extends z.ZodTypeAny, TData> = (
   input: ActionInput<TSchema>
-) => Promise<TData>
+) => Promise<ActionResponse<TSchema, TData>>
 
 type ServerAction<TSchema extends z.ZodTypeAny, Context, TData> = (opts: {
   input: z.input<TSchema>
   ctx: Context
 }) => Promise<TData>
 
-type ClientServerAction<TSchema extends z.ZodTypeAny, TData> =
-  | SafeActionWithValidation<TSchema, TData>
-  | ActionWithValidation<TSchema, TData>
+type ClientServerAction<
+  TSchema extends z.ZodTypeAny,
+  TData,
+> = ActionWithValidation<TSchema, TData>
 
 export type {
   ActionWithValidation,
@@ -53,7 +50,6 @@ export type {
   FieldsValidationError,
   ActionResponse,
   ActionInput,
-  SafeActionWithValidation,
   ClientServerAction,
   StatusToResponseState,
 }

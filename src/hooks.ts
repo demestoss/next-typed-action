@@ -6,11 +6,7 @@ import type {
   UseFormActionReturn,
 } from './hooks.types'
 import { useCallback, useRef, useState, useTransition } from 'react'
-import {
-  toErrorResponse,
-  toSuccessResponseOrAction,
-  toUnknownErrorResponse,
-} from './utils'
+import { toErrorResponse } from './utils'
 
 function useResponseHooks<TSchema extends z.ZodTypeAny, TData>({
   onError,
@@ -53,10 +49,7 @@ function useActionSubmit<TSchema extends z.ZodTypeAny, TData>(
       schema: ActionInput<TSchema>,
       reset: () => void
     ): Promise<ActionResponse<TSchema, TData>> =>
-      serverActionRef
-        .current(schema)
-        .then((r) => runHooks(toSuccessResponseOrAction(r), reset))
-        .catch((e: unknown) => runHooks(toUnknownErrorResponse(e), reset)),
+      serverActionRef.current(schema).then((r) => runHooks(r, reset)),
     [runHooks]
   )
 }

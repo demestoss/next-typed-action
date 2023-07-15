@@ -10,8 +10,8 @@
 
 ## Table of Contents
 - [Key Features](#key-features)
-- [Example](#example)
 - [Installation](#installation)
+- [Setup](#setup)
 - [Usage](#usage)
 - [API](#api)
 
@@ -23,14 +23,30 @@
 - __Use with hooks:__ integrate with yor client form to show loading/validation error or refetch your data
 - __Infer action type:__ infer action context and input type to use it for action handlers in different modules
 
-## Example
+## Installation
+
+### Requirements
+- Next.js >= 12.4.x
+- TypeScript >= 5.x.x
+
+### Config next.config.js
+```js
+module.exports = {
+  experimental: {
+    serverActions: true,
+    // ...
+  },
+}
+```
+
+## Setup
 
 ```ts
 // src/lib/server-actions.ts
-import { createServerAction } from 'next-typed-action';
+import { typedServerActionClient } from 'next-typed-action';
 import { cookies } from "next/headers";
 
-export const actionClient = createServerAction()
+export const actionClient = typedServerActionClient()
 
 export const authActionClient = actionClient.use((ctx) => {
   const userId = cookies().get('userId') // can access previous context value
@@ -54,34 +70,20 @@ const loginDto = z.object({
   username: z.string(),
   password: z.string(),
 })
-const loginAction = actionClient
+const login = actionClient
   .input(loginDto)
   .action(({ input, ctx }) => {
     // ...
   })
 
-const createItemAction = authActionClient
+const createItem = authActionClient
   .input(z.string())
   .action(({ input, ctx }) => {
     // ...
   })
 ```
 
-## Installation
 
-### Requirements
-- Next.js >= 12.4.x
-- TypeScript >= 5.x.x
-
-### Config next.config.js
-```js
-module.exports = {
-  experimental: {
-    serverActions: true,
-    // ...
-  },
-}
-```
 
 ### Run command
 ```
@@ -97,9 +99,147 @@ pnpm add next-typed-action zod
 ```
 
 ## Usage
-TODO
+
+### Multiple middlewares
+```ts
+import { typedServerActionClient } from 'next-typed-action';
+const actionClient = typedServerActionClient()
+const authActionClient = actionClient.use(() => {
+  // ...
+})
+const adminActionClient = authActionClient.use(() => {
+  // ...
+})
+const otherActionClient = adminActionClient
+  .use(() => {
+   // ...
+  })
+  .use(() => {
+    // ...
+  })
+  .use()
+```
+
+### Reuse action with input declare schema once and reuse
+```ts
+const itemOperationsActionClient = authActionClient.input(z.string())
+
+const deleteItem = itemOperationsActionClient.action(({ input, ctx }) => {})
+const getItem = itemOperationsActionClient.action(({ input, ctx }) => {})
+const someActionItem = itemOperationsActionClient.action(({ input, ctx }) => {})
+```
+
+### Usage with form
+
+```tsx
+'use client'
+import { useFormAction } from "next-typed-action";
+import { login } from './_actions'
+
+export default LoginForm()
+{
+  const { validationError, isLoading, error } = useFormAction(login)
+
+  if (error) {
+    // throw error to error boundary error.tsx if you want to handle it there
+    throw error
+  }
+  
+  return (
+    <form action={onSubmit}>
+      <input name="username"/>
+      // Show validation error type-safety way for each field in form
+      {validationError?.username && <div>{validationError.username[0]}</div>
+
+      <input name="password"/>
+      {validationError?.password && <div>{validationError.password[0]}</div>
+        
+      <button type="submit" disabled={isLoading}>Create</button>
+      // Or show error
+      {error && <div>{error.message}</div>}
+    </form>
+  )
+}
+```
+
+### Usage inline without form submit
+  
+```tsx
+import { useFormAction } from "next-typed-action";
+import { createItem } from './_actions'
+
+export default CreateItemForm()
+{
+  return (
+    <div>
+      <button type="submit" onClick={async () => {
+        const { error, data, validationError, status } = await createItem({ name: 'mock-item' })
+        // work with returned data
+        if (status === 'success') {
+          // ...
+        } else if (status === 'validationError') {
+          // ...
+        } else if (status === 'error') {
+          // ...
+        }
+      }}>
+        Create
+      </button>
+    </div>
+  )
+}
+```
+
+### Infer Action Context and Input
+```ts
+import { typedServerActionClient, inferContext, inferAction, inferInput } from 'next-typed-action';
+const actionClient = typedServerActionClient()
+
+type ActionClientContext = inferContext<typeof actionClient> // {}
+type ActionClient = inferAction<typeof actionClient> // { ctx: {} }
+```
+
+```ts
+const authActionClient = actionClient.use(() => ({
+  userId: 'mock-user-id',
+}))
+
+type AuthActionClientContext = inferContext<typeof actionClient> // { userId: string }
+type AuthActionClient = inferAction<typeof actionClient> // { ctx: { userId: string } }
+```
+
+```ts
+const loginActionClient = authActionClient.input(z.object({
+    username: z.string(),
+    password: z.string(),
+  }))
+
+type LoginActionClientContext = inferContext<typeof actionClient> // { userId: string }
+type LoginActionClientInput = inferInput<typeof actionClient> // { username: string, password: string }
+type LoginActionClient = inferAction<typeof actionClient> // { ctx: { userId: string }, input: { username: string, password: string } }
+```
 
 ## API
+
+### useFormAction hook
+```ts
+const {
+  status: 'error' | 'validationError' | 'success' | 'idle',
+  data: TData | undefined,
+  error: Error | undefined,
+  validationError: Record<keyof z.input<TSchema>, string[]> | undefined,
+  isLoading: boolean,
+  isError: boolean,
+  isValidationError: boolean,
+  isSuccess: boolean,
+  submit: (schema: z.input<TShema> | FormData) => void,
+  reset: () => void,
+} = useFormAction<TSchema, TData>(
+  typedServerAction: ClientServerAction<TShema, TData> // action created by typedServerActionClient()
+)
+```
+
+### Other
 TODO
 
 ## License
