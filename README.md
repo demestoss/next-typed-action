@@ -139,11 +139,6 @@ import { login } from './_actions'
 export default LoginForm()
 {
   const { validationError, isLoading, error } = useFormAction(login)
-
-  if (error) {
-    // throw error to error boundary error.tsx if you want to handle it there
-    throw error
-  }
   
   return (
     <form action={onSubmit}>
@@ -155,7 +150,7 @@ export default LoginForm()
       {validationError?.password && <div>{validationError.password[0]}</div>
         
       <button type="submit" disabled={isLoading}>Create</button>
-      // Or show error
+      // Show server error
       {error && <div>{error.message}</div>}
     </form>
   )
@@ -182,6 +177,49 @@ export default CreateItemForm()
         } else if (status === 'error') {
           // ...
         }
+      }}>
+        Create
+      </button>
+    </div>
+  )
+}
+```
+
+### Throw error to Boundary in hook (not stable)
+```tsx
+'use client'
+import { useFormAction } from "next-typed-action";
+import { login } from './_actions'
+
+export default LoginForm()
+{
+  // Throw error to boundary on server error
+  // Validation error still will be handled by useFormAction
+  const { validationError, isLoading } = useFormAction(login, { throwOnError: true })
+  
+  return (
+    <form action={onSubmit}>
+      // ...
+    </form>
+  )
+}
+```
+
+### Throw error to Boundary in action client
+```ts
+import { useFormAction } from "next-typed-action";
+import { createItem } from './_actions'
+
+export default CreateItemForm()
+{
+  return (
+    <div>
+      <button type="submit" onClick={async () => {
+        const { data, validationError, status } = await createItem(
+          { name: 'mock-item' }, 
+          // Will thrown on error to Error Boundary
+          { throwOnError: true }
+        )
       }}>
         Create
       </button>
@@ -235,7 +273,10 @@ const {
   submit: (schema: z.input<TShema> | FormData) => void,
   reset: () => void,
 } = useFormAction<TSchema, TData>(
-  typedServerAction: ClientServerAction<TShema, TData> // action created by typedServerActionClient()
+  typedServerAction: ClientServerAction<TShema, TData>, // action created by typedServerActionClient()
+  {
+    throwOnError?: boolean // @not-stable throw error to error boundary error.tsx if you want to handle it there
+  }
 )
 ```
 
