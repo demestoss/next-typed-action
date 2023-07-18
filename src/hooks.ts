@@ -1,12 +1,19 @@
 import type { z } from 'zod'
-import type { ActionInput, ActionResponse, ClientServerAction } from './types'
+import type {
+  ActionInput,
+  ActionResponse,
+  ActionResponseThrowable,
+  ClientServerActionSafe,
+  ClientServerAction,
+} from './types'
 import type {
   HookCallbacks,
   HookOptions,
   UseFormActionReturn,
+  UseFormActionReturnSafe,
+  UseFormActionReturnThrowable,
 } from './hooks.types'
 import { useCallback, useRef, useState, useTransition } from 'react'
-import { toErrorResponse } from './utils'
 
 function useResponseHooks<TSchema extends z.ZodTypeAny, TData>({
   onError,
@@ -21,11 +28,16 @@ function useResponseHooks<TSchema extends z.ZodTypeAny, TData>({
   onValidationErrorRef.current = onValidationError
 
   return useCallback(
-    (response: ActionResponse<TSchema, TData>, reset: () => void) => {
+    (
+      response:
+        | ActionResponse<TSchema, TData>
+        | ActionResponseThrowable<TSchema, TData>,
+      reset: () => void
+    ) => {
       if (response.status === 'success') {
         onSuccessRef.current?.(response.data, reset)
       } else if (response.status === 'validationError') {
-        onValidationErrorRef.current?.(response.validationError, reset)
+        onValidationErrorRef.current?.(response.validation, reset)
       } else {
         onErrorRef.current?.(response.error, reset)
       }
@@ -35,29 +47,29 @@ function useResponseHooks<TSchema extends z.ZodTypeAny, TData>({
   )
 }
 
-function useActionSubmit<TSchema extends z.ZodTypeAny, TData>(
-  serverAction: ClientServerAction<TSchema, TData>,
-  opts: HookOptions<TSchema, TData>
-) {
+function useActionSubmit<
+  TSchema extends z.ZodTypeAny,
+  TData,
+  TServerAction extends ClientServerAction<TSchema, TData>,
+>(serverAction: TServerAction, opts: HookOptions<TSchema, TData>) {
   const serverActionRef = useRef(serverAction)
   serverActionRef.current = serverAction
 
   const runHooks = useResponseHooks<TSchema, TData>(opts)
 
   return useCallback(
-    async (
-      schema: ActionInput<TSchema>,
-      reset: () => void
-    ): Promise<ActionResponse<TSchema, TData>> =>
-      serverActionRef
-        .current(schema, { throwError: opts.throwOnError })
-        .then((r) => runHooks(r, reset)),
-    [runHooks, opts.throwOnError]
+    async (schema: ActionInput<TSchema>, reset: () => void) =>
+      serverActionRef.current(schema).then((r) => runHooks(r, reset)),
+    [runHooks]
   )
 }
 
-function useFormAction<TSchema extends z.ZodTypeAny, TData>(
-  serverAction: ClientServerAction<TSchema, TData>,
+function useFormAction<
+  TSchema extends z.ZodTypeAny,
+  TData,
+  TServerAction extends ClientServerAction<TSchema, TData>,
+>(
+  serverAction: TServerAction,
   opts: HookOptions<TSchema, TData> = {}
 ): UseFormActionReturn<TSchema, TData> {
   const [isPending, startTransition] = useTransition()
@@ -75,16 +87,9 @@ function useFormAction<TSchema extends z.ZodTypeAny, TData>(
     (schema: ActionInput<TSchema>) =>
       startTransition(() =>
         // @ts-ignore
-        submitAction(schema, reset)
-          .then((res) => setResponse(res))
-          .catch((e: unknown) => {
-            if (opts.throwOnError) {
-              throw e
-            }
-            setResponse(toErrorResponse(e))
-          })
+        submitAction(schema, reset).then((res) => setResponse(res))
       ),
-    [reset, submitAction, opts.throwOnError]
+    [reset, submitAction]
   )
 
   const status = response?.status
@@ -102,12 +107,12 @@ function useFormAction<TSchema extends z.ZodTypeAny, TData>(
     isError: status === 'error',
     isValidationError: response?.status === 'validationError',
     data: response?.status === 'success' ? response.data : undefined,
-    validationError:
-      response?.status === 'validationError'
-        ? response.validationError
-        : undefined,
+    validation:
+      response?.status === 'validationError' ? response.validation : undefined,
     error: response?.status === 'error' ? response.error : undefined,
-  } as UseFormActionReturn<TSchema, TData>
+  } as TServerAction extends ClientServerActionSafe<TSchema, TData>
+    ? UseFormActionReturnSafe<TSchema, TData>
+    : UseFormActionReturnThrowable<TSchema, TData>
 }
 
 export { useFormAction }
