@@ -8,6 +8,26 @@
   The most efficient way to use server action powered by Zod
 </div>
 
+<br />
+
+<div align="center">
+  <!-- Stability -->
+  <a href="https://nodejs.org/api/documentation.html#documentation_stability_index">
+    <img src="https://img.shields.io/badge/stability-experimental-orange.svg?style=flat-square"
+      alt="API stability" />
+  </a>
+  <!-- NPM version -->
+  <a href="https://www.npmjs.com/package/next-typed-action">
+    <img src="https://img.shields.io/npm/v/next-typed-action.svg?style=flat-square"
+      alt="NPM version" />
+  </a>
+  <!-- Bundle size -->
+  <a href="https://www.npmjs.com/package/next-typed-action">
+    <img src="https://img.shields.io/bundlephobia/minzip/next-typed-action.svg?style=flat-square"
+      alt="Bundle size" />
+  </a>
+</div>
+
 ## Table of Contents
 - [Key Features](#key-features)
 - [Installation](#installation)
