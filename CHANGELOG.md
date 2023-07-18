@@ -1,5 +1,15 @@
 # next-typed-action
 
+## 0.1.0
+
+### Minor Changes
+
+- b8fde07: Added new actionThrowable, adjustments to types and hook to work with new action type. Removed throwOnError param
+
+### Patch Changes
+
+- b8fde07: Added support for empty input
+
 ## 0.0.5
 
 ### Patch Changes
