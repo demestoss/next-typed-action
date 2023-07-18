@@ -5,5 +5,14 @@ export type {
   inferContext,
   inferInput,
 } from './client-builder.utils'
-export type { ClientServerAction, ActionInput } from './types'
-export type { UseFormActionReturn } from './hooks.types'
+export type {
+  ClientServerActionSafe,
+  ActionInput,
+  ClientServerActionThrowable,
+  ClientServerAction,
+} from './types'
+export type {
+  UseFormActionReturn,
+  UseFormActionReturnThrowable,
+  UseFormActionReturnSafe,
+} from './hooks.types'

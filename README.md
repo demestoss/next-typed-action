@@ -129,6 +129,17 @@ const getItem = itemOperationsActionClient.action(({ input, ctx }) => {})
 const someActionItem = itemOperationsActionClient.action(({ input, ctx }) => {})
 ```
 
+### Create Action without input 
+```ts
+const itemOperationsActionClient = authActionClient.action(
+  ({ 
+    input, // void type
+    ctx 
+  }) => {
+    // ...
+})
+```
+
 ### Usage with form
 
 ```tsx
@@ -138,16 +149,16 @@ import { login } from './_actions'
 
 export default LoginForm()
 {
-  const { validationError, isLoading, error } = useFormAction(login)
+  const { validation, isLoading, error } = useFormAction(login)
   
   return (
     <form action={onSubmit}>
       <input name="username"/>
       // Show validation error type-safety way for each field in form
-      {validationError?.username && <div>{validationError.username[0]}</div>
+      {validation?.username && <div>{validation.username[0]}</div>
 
       <input name="password"/>
-      {validationError?.password && <div>{validationError.password[0]}</div>
+      {validation?.password && <div>{validation.password[0]}</div>
         
       <button type="submit" disabled={isLoading}>Create</button>
       // Show server error
@@ -168,7 +179,7 @@ export default CreateItemForm()
   return (
     <div>
       <button type="submit" onClick={async () => {
-        const { error, data, validationError, status } = await createItem({ name: 'mock-item' })
+        const { error, data, validation, status } = await createItem({ name: 'mock-item' })
         // work with returned data
         if (status === 'success') {
           // ...
@@ -185,17 +196,21 @@ export default CreateItemForm()
 }
 ```
 
-### Throw error to Boundary in hook (not stable)
+### Throw error to Boundary with throwable action
 ```tsx
 'use client'
 import { useFormAction } from "next-typed-action";
-import { login } from './_actions'
+
+const loginThrowable = actionClient
+  .actionThrowable(({ input, ctx }) => {
+    // ...
+  })
 
 export default LoginForm()
 {
   // Throw error to boundary on server error
   // Validation error still will be handled by useFormAction
-  const { validationError, isLoading } = useFormAction(login, { throwOnError: true })
+  const { validation, isLoading } = useFormAction(loginThrowable)
   
   return (
     <form action={onSubmit}>
@@ -208,17 +223,20 @@ export default LoginForm()
 ### Throw error to Boundary in action client
 ```ts
 import { useFormAction } from "next-typed-action";
-import { createItem } from './_actions'
+
+const createItemThrowable = actionClient
+  .input(...)
+  .actionThrowable(({ input, ctx }) => {
+    // ...
+  })
 
 export default CreateItemForm()
 {
   return (
     <div>
       <button type="submit" onClick={async () => {
-        const { data, validationError, status } = await createItem(
+        const { data, validation, status } = await createItemThrowable(
           { name: 'mock-item' }, 
-          // Will thrown on error to Error Boundary
-          { throwOnError: true }
         )
       }}>
         Create
@@ -259,13 +277,13 @@ type LoginActionClient = inferAction<typeof actionClient> // { ctx: { userId: st
 
 ## API
 
-### useFormAction hook
+### useFormAction hook with default action
 ```ts
 const {
   status: 'error' | 'validationError' | 'success' | 'idle',
   data: TData | undefined,
   error: string | undefined,
-  validationError: Record<keyof z.input<TSchema>, string[]> | undefined,
+  validation: Record<keyof z.input<TSchema>, string[]> | undefined,
   isLoading: boolean,
   isError: boolean,
   isValidationError: boolean,
@@ -273,10 +291,23 @@ const {
   submit: (schema: z.input<TShema> | FormData) => void,
   reset: () => void,
 } = useFormAction<TSchema, TData>(
-  typedServerAction: ClientServerAction<TShema, TData>, // action created by typedServerActionClient()
-  {
-    throwOnError?: boolean // @not-stable throw error to error boundary error.tsx if you want to handle it there
-  }
+  typedServerAction: ClientServerActionSafe<TShema, TData>, // action created by typedServerActionClient().[...].action
+)
+```
+
+### useFormAction hook with throwable action
+```ts
+const {
+  status: 'validationError' | 'success' | 'idle',
+  data: TData | undefined,
+  validation: Record<keyof z.input<TSchema>, string[]> | undefined,
+  isLoading: boolean,
+  isValidationError: boolean,
+  isSuccess: boolean,
+  submit: (schema: z.input<TShema> | FormData) => void,
+  reset: () => void,
+} = useFormAction<TSchema, TData>(
+  typedServerAction: ClientServerActionThrowable<TShema, TData>, // action created by typedServerActionClient().[...].actionThrowable
 )
 ```
 
