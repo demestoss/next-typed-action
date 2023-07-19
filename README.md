@@ -22,7 +22,7 @@
       alt="NPM version" />
   </a>
   <!-- Bundle size -->
-  <a href="https://www.npmjs.com/package/next-typed-action">
+  <a href="https://bundlephobia.com/package/next-typed-action">
     <img src="https://img.shields.io/bundlephobia/minzip/next-typed-action.svg?style=flat-square"
       alt="Bundle size" />
   </a>
