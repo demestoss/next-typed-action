@@ -300,7 +300,7 @@ type LoginActionClient = inferAction<typeof actionClient> // { ctx: { userId: st
 ### useFormAction hook with default action
 ```ts
 const {
-  status: 'error' | 'validationError' | 'success' | 'idle',
+  status: 'error' | 'validationError' | 'success' | 'loading' | 'idle',
   data: TData | undefined,
   error: string | undefined,
   validation: Record<keyof z.input<TSchema>, string[]> | undefined,
@@ -318,7 +318,7 @@ const {
 ### useFormAction hook with throwable action
 ```ts
 const {
-  status: 'validationError' | 'success' | 'idle',
+  status: 'validationError' | 'success' | 'loading' | 'idle',
   data: TData | undefined,
   validation: Record<keyof z.input<TSchema>, string[]> | undefined,
   isLoading: boolean,
